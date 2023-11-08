@@ -1,71 +1,261 @@
-[Project]
-FileName=StudentManagement.dev
-Name=StudentManagement
-Type=1
-Ver=2
-ObjFiles=
-Includes=
-Libs=
-PrivateResource=
-ResourceIncludes=
-MakeIncludes=
-Compiler=
-CppCompiler=
-Linker=
-IsCpp=0
-Icon=
-ExeOutput=
-ObjectOutput=
-LogOutput=
-LogOutputEnabled=0
-OverrideOutput=0
-OverrideOutputName=
-HostApplication=
-UseCustomMakefile=0
-CustomMakefile=
-CommandLine=
-Folders=
-IncludeVersionInfo=0
-SupportXPThemes=0
-CompilerSet=0
-CompilerSettings=0000000000000000000000000
-UnitCount=2
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <conio.h>
 
-[VersionInfo]
-Major=1
-Minor=0
-Release=0
-Build=0
-LanguageID=1033
-CharsetID=1252
-CompanyName=
-FileVersion=1.0.0.0
-FileDescription=Developed using the Dev-C++ IDE
-InternalName=
-LegalCopyright=
-LegalTrademarks=
-OriginalFilename=
-ProductName=
-ProductVersion=1.0.0.0
-AutoIncBuildNr=0
-SyncProduct=1
+#define MAX_STUDENTS 84 // Maximum number of students
+#define MAX_NAME_LENGTH 50 // Maximum length of the student name
+int p = 84;
 
-[Unit1]
-FileName=main.c
-CompileCpp=0
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
+struct Student {
+    int studentNumber;
+    char studentName[50];
+    int labGrade;
+	int midtermGrade;
+	int finaleGrade;
+	float calculatedGrade ;
+	char letterGrade ;
 
-[Unit2]
-FileName=student.txt
-Folder=
-Compile=0
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
+};
+/*void fileIntoArray(struct Student *);
+list( struct Student *students, int numStudents); */
 
+
+void fileIntoArray(struct Student *students) {
+	
+    	FILE *file = fopen("student.txt", "r"); // Open the file in read mode
+    	if (file == NULL) {
+       		printf("Could not open the file.\n");
+        	exit(1);
+    	}
+    	
+    	int numStudents = 0;
+
+    	while (fscanf(file, "%d %s %d %d %d", &students[numStudents].studentNumber, students[numStudents].studentName,
+	 	&students[numStudents].labGrade, &students[numStudents].midtermGrade, &students[numStudents].finaleGrade) == 5 ) {
+        numStudents++;
+        if (numStudents > MAX_STUDENTS) {
+            printf("Max number of students reached. Ignoring the rest.\n");
+            break;
+     	}
+    }
+
+    	fclose(file);
+	}
+// END FUNCTION FILEINTOARRAY
+void list(struct Student *students, int numStudents,int start){
+    for (int i = 0; i < numStudents && i< start ; i++) {
+    		printf("Number: %d Student Name: %s lab: %d midterm: %d final: %d grade: %f  LettreGrade: %c \n", students[i].studentNumber, students[i].studentName, 
+			students[i].labGrade,students[i].midtermGrade,students[i].finaleGrade,students[i].calculatedGrade,students[i].letterGrade);
+    
+    }
+}
+float findGrade(struct Student single)
+{
+ float grade=0;
+ grade= 0.25*single.labGrade + 0.35*single.midtermGrade + 0.40*single.finaleGrade;
+ return grade;	
+}
+char findLetterGrade(float grade)
+{
+  if(grade>= 80) return 'A';
+	    	else if (grade >=70) return 'B';
+	             	else if ( grade >=60) return 'C';
+						    else if (grade>=50)	return 'D';
+							   		else return 'F';		
+}
+void calculatedGrade(struct Student *students,int n)
+{
+ struct Student student;
+ float grade;
+ char letter;
+   
+ for(int i=0;i<n;i++)
+ {
+ 	  student = students[i];
+ 	  grade = findGrade(student);
+ 	  letter = findLetterGrade(grade);
+ 	  students[i].calculatedGrade = grade;
+ 	  students[i].letterGrade = letter;
+  }
+}
+/* SelectSort by name */
+void selectSort(struct Student *students,int size){
+	int min_pos;
+	struct Student tempo;
+	for(int i=0; i< size-1; i++){
+		min_pos = i;
+	
+		for(int j=i+1;j<size; j++){
+			if(strcmp(students[min_pos].studentName, students[j].studentName) > 0){
+				min_pos = j;
+			}
+		}
+			tempo = students[min_pos]; 
+			students[min_pos] = students[i];
+			students[i]= tempo;
+    }
+		
+ }
+ 
+ /* BUBBLE SORT*/
+ void bubbleSort(struct Student  *students, int n){
+	int flag;
+	struct Student temp;
+	do{
+		flag = 0;
+		for(int i=0; i< n-1;i++){
+			if(students[i].studentNumber > students[i+1].studentNumber){
+				temp = students[i];
+				students[i]= students[i+1];
+				students[i+1]= temp;
+				flag=1;	
+			}
+		}
+		n--;	
+	}while(flag);
+		
+} 
+ /* END BUBBLE SORT*/
+ 
+ /* INSERTION OF A NEW STUDENT*/
+ int insertion(struct Student *students, struct Student given, int n){
+	int i;
+	
+	for( i=0; i< n; i++){
+		if(students[i].studentNumber >  given.studentNumber)
+			break;
+	}
+	
+	for(int j= n; j>i; j--){
+		students[j] = students[j-1];
+	}	
+	students[i]=given;
+	//n= n +1;
+	p=p+1;
+	return p;
+}
+ /* END INSERTION */
+ /* BINARY SEACH */
+ int binarySearch(struct Student *students, int numberStudent, int n){
+	int mid;
+	int lower=0;
+	int upper= n;
+	while(lower<=upper){
+		mid = (lower + upper)/2;
+		if(numberStudent == students[mid].studentNumber)
+			return mid;
+		else if(numberStudent < students[mid].studentNumber)
+			upper = mid -1;
+		else
+			lower = mid +1;
+	}
+	printf("%d not found on the array\n", numberStudent);
+	return -1;
+}
+ /* END BINARY SERACH */
+/* DELETION OF A GIVEN STUDENT */
+int delete(struct Student *students , int numbStudent , int n)
+{
+	if(binarySearch(students, numbStudent, n) != -1){
+		int i;
+		for( i=0;i< n; i++)
+			if (students[i].studentNumber == numbStudent) break;
+	
+		for (int j=i;j< n;j++){
+			students[j]= students[j+1];
+		}
+			
+		p= p-1;
+	}
+	//printf("Press any key to display the student list");
+	//getch();
+	return p;	
+}
+/* END OF DELETION */
+
+void listGradeDistribution(struct Student *students, int n){
+	int A=0; int B=0; int C=0; int D=0; int E=0; int F=0;
+	for(int i=0; i< n ; i++){
+		if(students[i].letterGrade == 'A')
+		A++;
+		if(students[i].letterGrade == 'B')
+		B++;
+		if(students[i].letterGrade == 'C')
+		C++;
+		if(students[i].letterGrade == 'D')
+		D++;
+		if(students[i].letterGrade == 'E')
+		E++;
+		if(students[i].letterGrade == 'F')
+		F++;
+	}
+	printf("Grades: A= %d B= %d C= %d D= %d E= %d F=%d\n", A,B,C,D,E,F);
+}
+ void affineList(struct Student *students, int size){
+ 	char ch;
+ 	int start = 0;
+    	do{
+    	system("cls");
+    	start += 25; // Move to the next chunk of 25 students
+    	list(students, p, start);
+    	printf("Press any key to display the next 25 students information or 'q' to quit:");
+		 ch = getch(); // Wait for user input
+	} while (ch != 'q' && start < size);
+}
+
+int main() {
+	char ch;
+	struct Student students[90] ;
+    fileIntoArray(students);
+    calculatedGrade(students,p);
+    int choice;
+    struct Student newStudent;
+    int tempNo;
+    do{
+  printf("\nMenu:\n 1 - SelectSort\n 2 - BubbleSort \n 3 - Insertion of a new student\n 4 - Deleting a given student\n 5 - Binary Search\n 6 - listGradeDistribution\n 7 - Exit ");
+  printf("\n Enter Operation type: ");
+  scanf("%d",&choice);
+  switch(choice)
+  {
+    case 1 : 
+	selectSort(students, p);
+	affineList(students,p);
+	break;
+    case 2 : 
+	bubbleSort(students, p);
+	affineList(students,p);
+	break;
+    case 3 :
+    printf("Insert a new Student Info: Matricule - Name - labGrade - midtermGrade and finalGrade \n");
+    scanf("%d %s %d %d %d, %d",&newStudent.studentNumber, newStudent.studentName, &newStudent.labGrade, &newStudent.midtermGrade, &newStudent.finaleGrade);
+    if((newStudent.labGrade<0 || newStudent.labGrade>100) || (newStudent.midtermGrade<0 || newStudent.midtermGrade>100) || (newStudent.finaleGrade<0 || newStudent.finaleGrade>100)){
+    	printf("The grade should be between 0 and 100");
+    	break;
+	}
+    p=insertion(students, newStudent, p);
+	affineList(students,p);
+	break;
+    case 4: 
+	printf("deletion operation: Enter Student Number\n");
+    scanf("%d",&tempNo);
+    p=delete(students, tempNo, p);
+	affineList(students,p);
+	break;
+    case 5: 
+	printf("Insert a Student number for search operation\n");
+    scanf("%d",&tempNo);
+    bubbleSort(students, p);
+    int indice = binarySearch(students,tempNo, p );
+    if(indice!= -1)
+    printf("This  %d student number is on the array at the position %d \n", tempNo, indice);
+	break;
+    case 6:
+    calculatedGrade(students,MAX_STUDENTS);	
+	listGradeDistribution(students, p);
+	break;
+  }
+ }while(choice !=7);
+    
+    return 0;
+}
